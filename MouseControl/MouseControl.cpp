@@ -233,7 +233,7 @@ void ControlMouse(int deviceID)
     case 1:
         if (deviceID == mainMouseID) {
             float idleTime = (time - lastTime) / (float)CLOCKS_PER_SEC;
-            if (idleTime >= 0.5 && display != lastDisplay)
+            if (display != lastDisplay && abs(p.x - lastMousePos.x) + abs(p.y - lastMousePos.y) >= 50)
                 SetCursorPos(lastMousePos.x, lastMousePos.y);
             else {
                 lastMousePos = p;
