@@ -27,6 +27,7 @@ int mainMouseID;
 POINT lastMousePos;
 int lastDisplay;
 std::clock_t lastTime;
+int lastMouse;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -213,6 +214,29 @@ int WhichDisplay(POINT p)
     return  monitors->rcMonitors.size();
 }
 
+bool atEdge(POINT p, int display, int gap) 
+{
+    RECT displayRect = monitors->rcMonitors[display];
+    if (p.x <= displayRect.left + gap || p.x >= displayRect.right - gap || p.y <= displayRect.top + gap || p.y >= displayRect.bottom - gap) {
+        wsprintf(debugInfo, L"%d %d    %d %d %d %d    %d", p.x, p.y, displayRect.left + gap, displayRect.right - gap,
+            displayRect.top + gap, displayRect.bottom - gap, 1);
+        return true;
+    }
+    else {
+        wsprintf(debugInfo, L"%d %d    %d %d %d %d    %d", p.x, p.y, displayRect.left + gap, displayRect.right - gap,
+            displayRect.top + gap, displayRect.bottom - gap, 0);
+        return false;
+    }
+}
+
+
+void ChangeCursorSize(int w, int h)
+{
+    HCURSOR bigCursor;
+    bigCursor = (HCURSOR)LoadImage(NULL, L"arrow_rm.cur", IMAGE_CURSOR, w, h, LR_LOADFROMFILE);
+    SetSystemCursor(bigCursor, 32650);
+}
+
 
 void ControlMouse(int deviceID)
 {
@@ -226,15 +250,15 @@ void ControlMouse(int deviceID)
         lastMousePos = p;
         lastTime = time;
         lastDisplay = display;
-        mainMouseID = deviceID;
         state = 1;
+        mainMouseID = deviceID;
         break;
-
-    case 1:
+    default:
         if (deviceID == mainMouseID) {
-            float idleTime = (time - lastTime) / (float)CLOCKS_PER_SEC;
-            if (display != lastDisplay && abs(p.x - lastMousePos.x) + abs(p.y - lastMousePos.y) >= 50)
+            float idleTime = (time - lastTime) / (float)CLOCKS_PER_SEC * 1000.0f; // In milliseconds
+            if (abs(p.x - lastMousePos.x) + abs(p.y - lastMousePos.y) >= 50 && !atEdge(p, display, 10)) {
                 SetCursorPos(lastMousePos.x, lastMousePos.y);
+            }
             else {
                 lastMousePos = p;
                 lastTime = time;
@@ -296,7 +320,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case IDM_EXIT:
             TrayDeleteIcon(hWnd);
-            DestroyWindow(hWnd);
+            PostQuitMessage(0);
             break;
         case IDM_SHOW:
             SetForegroundWindow(hWnd);
@@ -416,10 +440,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
 
-    /* Junk
     case WM_TOUCH:
     {
-        wsprintf(mousemessage, L"Touch");
+        wsprintf(debugInfo, L"Touch");
         UINT cInputs = LOWORD(wParam);
         PTOUCHINPUT pInputs = new TOUCHINPUT[cInputs];
         if (NULL != pInputs)
@@ -443,7 +466,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             delete[] pInputs;
         }
         break;
-    }*/
+    }
 
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
