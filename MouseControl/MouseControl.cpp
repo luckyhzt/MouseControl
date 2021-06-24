@@ -218,13 +218,13 @@ bool atEdge(POINT p, int display, int gap)
 {
     RECT displayRect = monitors->rcMonitors[display];
     if (p.x <= displayRect.left + gap || p.x >= displayRect.right - gap || p.y <= displayRect.top + gap || p.y >= displayRect.bottom - gap) {
-        wsprintf(debugInfo, L"%d %d    %d %d %d %d    %d", p.x, p.y, displayRect.left + gap, displayRect.right - gap,
-            displayRect.top + gap, displayRect.bottom - gap, 1);
+        //wsprintf(debugInfo, L"%d %d    %d %d %d %d    %d", p.x, p.y, displayRect.left + gap, displayRect.right - gap,
+            //displayRect.top + gap, displayRect.bottom - gap, 1);
         return true;
     }
     else {
-        wsprintf(debugInfo, L"%d %d    %d %d %d %d    %d", p.x, p.y, displayRect.left + gap, displayRect.right - gap,
-            displayRect.top + gap, displayRect.bottom - gap, 0);
+        //wsprintf(debugInfo, L"%d %d    %d %d %d %d    %d", p.x, p.y, displayRect.left + gap, displayRect.right - gap,
+            //displayRect.top + gap, displayRect.bottom - gap, 0);
         return false;
     }
 }
